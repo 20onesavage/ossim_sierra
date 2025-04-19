@@ -110,7 +110,16 @@ int __alloc(struct pcb_t *caller, int vmaid, int rgid, int size, int *alloc_addr
     caller->mm->symrgtbl[rgid].rg_end = old_sbrk + size;
     *alloc_addr = old_sbrk;
   }
-  
+#ifdef IODUMP
+  printf("===MEMORY ALLOCATE===\n");
+  printf("PID=%d region=%d addr=%08x size=%d byte\n",
+         caller->pid, rgid, *alloc_addr, size);
+#ifdef PAGETBL_DUMP
+  print_pgtbl(caller, 0, -1); //print max TBL
+#endif
+  MEMPHY_dump(caller->mram);
+  printf("===END MEMORY ALLOCATE===\n");
+#endif
   pthread_mutex_unlock(&mmvm_lock);
   return 0;
 }
@@ -140,6 +149,15 @@ int __free(struct pcb_t *caller, int vmaid, int rgid)
   // /*enlist the obsoleted memory region */
   // //enlist_vm_freerg_list();
   enlist_vm_freerg_list(caller->mm, rgnode);
+#ifdef IODUMP
+  printf("===MEMORY FREE===\n");
+  printf("PID=%d region=%d\n", caller->pid, rgid);
+#ifdef PAGETBL_DUMP
+  print_pgtbl(caller, 0, -1); //print max TBL
+#endif
+  MEMPHY_dump(caller->mram);
+  printf("===END MEMORY FREE===\n");
+#endif
   return 0;
 }
 
@@ -366,11 +384,13 @@ int libread(
   // if (val == 0)
   *destination = (uint32_t)data;  
 #ifdef IODUMP
+  printf("===MEMORY READ===\n");
   printf("read region=%d offset=%d value=%d\n", source, offset, data);
 #ifdef PAGETBL_DUMP
   print_pgtbl(proc, 0, -1); //print max TBL
 #endif
   MEMPHY_dump(proc->mram);
+  printf("===END MEMORY READ===\n");
 #endif
 
   return val;
@@ -405,11 +425,13 @@ int libwrite(
     uint32_t offset)
 {
 #ifdef IODUMP
+  printf("===MEMORY WRITE===\n");
   printf("write region=%d offset=%d value=%d\n", destination, offset, data);
 #ifdef PAGETBL_DUMP
   print_pgtbl(proc, 0, -1); //print max TBL
 #endif
   MEMPHY_dump(proc->mram);
+  printf("===END MEMORY WRITE===\n");
 #endif
 
   return __write(proc, 0, destination, offset, data);

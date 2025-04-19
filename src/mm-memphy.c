@@ -163,12 +163,14 @@ int MEMPHY_dump(struct memphy_struct *mp)
   /*TODO dump memphy contnt mp->storage
    *     for tracing the memory content
    */
-//   printf("=== MEMPHY Dump ===\n");
-//   for (int i = 0; i < mp->maxsz; i++) {
-//       printf("%02X ", mp->storage[i]);
-//       if ((i + 1) % 16 == 0) printf("\n");
-//   }
-//   printf("\n===================\n");
+   if (mp == NULL || mp->storage == NULL) // check memory validity
+         return -1;
+  printf("=== MEMPHY Dump ===\n");
+  for (unsigned long i = 0; i < mp->maxsz; i++) {  // use unsigned long to avoid errors when traversing memory addresses
+      if(mp->storage[i] != 0) // check if value at address is not 0 
+         printf("BYTE %08lx: %08x\n", i, mp->storage[i]);
+  }
+  printf("\n======End of MEMPHY Dump=======\n");
    return 0;
 }
 
