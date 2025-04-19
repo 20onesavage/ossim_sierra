@@ -19,13 +19,17 @@ struct pcb_t * dequeue(struct queue_t * q) {
          * in the queue [q] and remember to remove it from q
          * */
         if(empty(q)) return NULL;
-        struct pcb_t * target_proc = NULL;   // pcb can deqeueu
-        target_proc = q->proc[0];    // pcb tra ve
-        // Xoa pcb khoi queue
-        int i;
-        for( i= 0; i< q->size -1; i++){
+
+        int highest_prio = 0;
+        for(int i = 0; i < q->size; i++){ // find highest priority
+                if(q->proc[i]->priority > q->proc[highest_prio]->priority){
+                        highest_prio = i;
+                }
+        }
+        struct pcb_t * target_proc = q->proc[highest_prio];
+        for(int i = highest_prio; i < q->size - 1; i++){
                 q->proc[i] = q->proc[i+1];
         }
-        q->size --;
+        q->size--;
         return target_proc;
 }
