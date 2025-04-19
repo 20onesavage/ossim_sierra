@@ -90,7 +90,7 @@ int __sys_killall(struct pcb_t *caller, struct sc_regs* regs)
             j++;
         }
         if(strcmp(tmp_name, proc_name) == 0){
-            libfree(proc, memrg);
+            libfree(proc, proc->regs[0]);
         }else{
             enqueue(&tmp2, proc);
         }
