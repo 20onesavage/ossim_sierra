@@ -82,7 +82,7 @@ int __alloc(struct pcb_t *caller, int vmaid, int rgid, int size, int *alloc_addr
     *alloc_addr = rgnode.rg_start;
 
     pthread_mutex_unlock(&mmvm_lock);
-    return 0;
+    goto label;
   }
     /* TODO get_free_vmrg_area FAILED handle the region management (Fig.6)*/
   
@@ -110,14 +110,19 @@ int __alloc(struct pcb_t *caller, int vmaid, int rgid, int size, int *alloc_addr
     caller->mm->symrgtbl[rgid].rg_end = old_sbrk + size;
     *alloc_addr = old_sbrk;
   }
+  label:
 #ifdef IODUMP
   printf("===MEMORY ALLOCATE===\n");
   printf("PID=%d region=%d addr=%08x size=%d byte\n",
          caller->pid, rgid, *alloc_addr, size);
+  for(int i = 0; i < PAGING_MAX_SYMTBL_SZ; i++)
+    if(caller->mm->symrgtbl[i].rg_end > 0)
+         printf("rg[%ld, %ld]\n",
+         caller->mm->symrgtbl[i].rg_start,
+         caller->mm->symrgtbl[i].rg_end-1);
 #ifdef PAGETBL_DUMP
   print_pgtbl(caller, 0, -1); //print max TBL
 #endif
-  MEMPHY_dump(caller->mram);
   printf("===END MEMORY ALLOCATE===\n");
 #endif
   pthread_mutex_unlock(&mmvm_lock);
@@ -149,13 +154,19 @@ int __free(struct pcb_t *caller, int vmaid, int rgid)
   // /*enlist the obsoleted memory region */
   // //enlist_vm_freerg_list();
   enlist_vm_freerg_list(caller->mm, rgnode);
+  caller->mm->symrgtbl[rgid].rg_start = 0;
+  caller->mm->symrgtbl[rgid].rg_end = 0;
 #ifdef IODUMP
   printf("===MEMORY FREE===\n");
   printf("PID=%d region=%d\n", caller->pid, rgid);
+  for(int i = 0; i < PAGING_MAX_SYMTBL_SZ; i++)
+    if(caller->mm->symrgtbl[i].rg_end > 0)
+         printf("rg[%ld, %ld]\n",
+         caller->mm->symrgtbl[i].rg_start,
+         caller->mm->symrgtbl[i].rg_end-1);
 #ifdef PAGETBL_DUMP
   print_pgtbl(caller, 0, -1); //print max TBL
 #endif
-  MEMPHY_dump(caller->mram);
   printf("===END MEMORY FREE===\n");
 #endif
   return 0;
