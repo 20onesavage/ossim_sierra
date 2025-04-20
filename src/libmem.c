@@ -98,7 +98,7 @@ int __alloc(struct pcb_t *caller, int vmaid, int rgid, int size, int *alloc_addr
    * inc_vma_limit(caller, vmaid, inc_sz)
    */
   
-  if(!inc_vma_limit(caller, vmaid, inc_sz)){
+  if(inc_vma_limit(caller, vmaid, inc_sz) == 0){
     if(inc_sz > size){
       struct vm_rg_struct *newrg = malloc(sizeof(struct vm_rg_struct));
       newrg->rg_start = old_sbrk + size + 1;
@@ -273,7 +273,7 @@ int pg_getpage(struct mm_struct *mm, int pgn, int *fpn, struct pcb_t *caller)
     //pte_set_fpn() &
     //mm->pgd[pgn];
     //pte_set_fpn();
-    pte_set_fpn(&mm->pgd[pgn], swpfpn);
+    pte_set_fpn(&mm->pgd[pgn], vicfpn);
 
     enlist_pgn_node(&caller->mm->fifo_pgn,pgn);
     *fpn = tgtfpn;
