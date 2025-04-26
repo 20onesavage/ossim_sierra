@@ -59,13 +59,13 @@ int __sys_killall(struct pcb_t *caller, struct sc_regs* regs)
         char tmp_name[100];
         data = 0;
         while(data != -1){
-            libread(proc, proc->regs[0], j, &data);
+            libread(proc, *(proc->regs), j, &data);
             tmp_name[j]= data;
             if(data == -1) tmp_name[j]='\0';
             j++;
         }
         if(strcmp(tmp_name, proc_name) == 0){
-            libfree(proc, proc->regs[0]);
+            proc->pc = proc->code->size;
         }else{
             enqueue(&tmp, proc);
         }
@@ -84,13 +84,13 @@ int __sys_killall(struct pcb_t *caller, struct sc_regs* regs)
         char tmp_name[100];
         data = 0;
         while(data != -1){
-            libread(proc, proc->regs[0], j, &data);
+            libread(proc, *(proc->regs), j, &data);
             tmp_name[j]= data;
             if(data == -1) tmp_name[j]='\0';
             j++;
         }
         if(strcmp(tmp_name, proc_name) == 0){
-            libfree(proc, proc->regs[0]);
+            proc->pc = proc->code->size;
         }else{
             enqueue(&tmp2, proc);
         }
